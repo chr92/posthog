@@ -2996,7 +2996,6 @@ export interface SessionData {
 
 export interface ExperimentStatsBase {
     key: string
-    breakdown_value?: string
     number_of_samples: integer
     sum: number
     sum_squares: number
@@ -3018,7 +3017,6 @@ export interface ExperimentStatsBaseValidated extends ExperimentStatsBase {
 }
 
 export interface ExperimentVariantResultFrequentist extends ExperimentStatsBaseValidated {
-    breakdown_value?: string
     method: 'frequentist'
     significant?: boolean
     p_value?: number
@@ -3026,7 +3024,6 @@ export interface ExperimentVariantResultFrequentist extends ExperimentStatsBaseV
 }
 
 export interface ExperimentVariantResultBayesian extends ExperimentStatsBaseValidated {
-    breakdown_value?: string
     method: 'bayesian'
     significant?: boolean
     chance_to_win?: number
