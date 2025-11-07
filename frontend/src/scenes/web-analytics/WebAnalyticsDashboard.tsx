@@ -48,6 +48,7 @@ import { InsightLogicProps, ProductKey } from '~/types'
 import { WebAnalyticsExport } from './WebAnalyticsExport'
 import { WebAnalyticsFilters } from './WebAnalyticsFilters'
 import { MarketingAnalyticsFilters } from './tabs/marketing-analytics/frontend/components/MarketingAnalyticsFilters/MarketingAnalyticsFilters'
+import { MarketingAnalyticsSourceStatusBanner } from './tabs/marketing-analytics/frontend/components/MarketingAnalyticsSourceStatusBanner'
 import { marketingAnalyticsLogic } from './tabs/marketing-analytics/frontend/logic/marketingAnalyticsLogic'
 import { marketingAnalyticsTilesLogic } from './tabs/marketing-analytics/frontend/logic/marketingAnalyticsTilesLogic'
 import { webAnalyticsModalLogic } from './webAnalyticsModalLogic'
@@ -491,6 +492,7 @@ const MarketingDashboard = (): JSX.Element => {
     return (
         <>
             {feedbackBanner}
+            <MarketingAnalyticsSourceStatusBanner />
             {component}
         </>
     )
@@ -542,7 +544,7 @@ export const WebAnalyticsDashboard = (): JSX.Element => {
             <BindLogic logic={dataNodeCollectionLogic} props={{ key: WEB_ANALYTICS_DATA_COLLECTION_NODE_ID }}>
                 <WebAnalyticsModal />
                 <VersionCheckerBanner />
-                <SceneContent className="WebAnalyticsDashboard w-full flex flex-col">
+                <SceneContent className="WebAnalyticsDashboard">
                     <WebAnalyticsTabs />
                     {/* Empty fragment so tabs are not part of the sticky bar */}
                     <Filters tabs={<></>} />
