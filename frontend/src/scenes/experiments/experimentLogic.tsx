@@ -34,6 +34,7 @@ import { groupsModel } from '~/models/groupsModel'
 import { QUERY_TIMEOUT_ERROR_MESSAGE, performQuery } from '~/queries/query'
 import {
     AnyEntityNode,
+    Breakdown,
     CachedExperimentFunnelsQueryResponse,
     CachedExperimentQueryResponse,
     CachedExperimentTrendsQueryResponse,
@@ -476,6 +477,8 @@ export const experimentLogic = kea<experimentLogicType>([
             isSecondary,
             newUuid,
         }),
+        updateMetricBreakdown: (uuid: string, breakdown: Breakdown) => ({ uuid, breakdown }),
+        removeMetricBreakdown: (uuid: string, index: number) => ({ uuid, index }),
         // METRICS RESULTS
         setLegacyPrimaryMetricsResults: (
             results: (
@@ -704,6 +707,62 @@ export const experimentLogic = kea<experimentLogicType>([
 
                     const newMetric = { ...originalMetric, uuid: newUuid, name }
                     metrics.splice(originalIndex + 1, 0, newMetric)
+
+                    return {
+                        ...state,
+                        [metricsKey]: metrics,
+                    }
+                },
+                updateMetricBreakdown: (state, { uuid, breakdown }) => {
+                    const metricsKey =
+                        (state?.metrics || ([] as ExperimentMetric[])).findIndex((m) => m.uuid === uuid) > -1
+                            ? 'metrics'
+                            : 'metrics_secondary'
+
+                    const metrics = [...(state?.[metricsKey] || [])]
+                    const targetIndex = metrics.findIndex((m) => m.uuid === uuid)
+                    if (targetIndex === -1) {
+                        return state
+                    }
+
+                    const metric = metrics[targetIndex] as ExperimentMetric
+                    const breakdownFilter = {
+                        ...metric.breakdownFilter,
+                        breakdowns: [...(metric.breakdownFilter?.breakdowns || []), breakdown],
+                    }
+
+                    metrics[targetIndex] = {
+                        ...metric,
+                        breakdownFilter,
+                    } as ExperimentMetric
+
+                    return {
+                        ...state,
+                        [metricsKey]: metrics,
+                    }
+                },
+                removeMetricBreakdown: (state, { uuid, index }) => {
+                    const metricsKey =
+                        (state?.metrics || ([] as ExperimentMetric[])).findIndex((m) => m.uuid === uuid) > -1
+                            ? 'metrics'
+                            : 'metrics_secondary'
+
+                    const metrics = [...(state?.[metricsKey] || [])]
+                    const targetIndex = metrics.findIndex((m) => m.uuid === uuid)
+                    if (targetIndex === -1) {
+                        return state
+                    }
+
+                    const metric = metrics[targetIndex] as ExperimentMetric
+                    const breakdownFilter = {
+                        ...metric.breakdownFilter,
+                        breakdowns: (metric.breakdownFilter?.breakdowns || []).filter((_, i) => i !== index),
+                    }
+
+                    metrics[targetIndex] = {
+                        ...metric,
+                        breakdownFilter,
+                    } as ExperimentMetric
 
                     return {
                         ...state,
@@ -1394,6 +1453,34 @@ export const experimentLogic = kea<experimentLogicType>([
                 if (logic) {
                     logic.actions.loadFeatureFlag() // Access the loader through actions
                 }
+            }
+        },
+        updateMetricBreakdown: async ({ uuid }) => {
+            const isPrimary = values.experiment.metrics.some((m) => m.uuid === uuid)
+
+            actions.updateExperiment({
+                metrics: values.experiment.metrics,
+                metrics_secondary: values.experiment.metrics_secondary,
+            })
+
+            if (isPrimary) {
+                actions.loadPrimaryMetricsResults(true)
+            } else {
+                actions.loadSecondaryMetricsResults(true)
+            }
+        },
+        removeMetricBreakdown: async ({ uuid }) => {
+            const isPrimary = values.experiment.metrics.some((m) => m.uuid === uuid)
+
+            actions.updateExperiment({
+                metrics: values.experiment.metrics,
+                metrics_secondary: values.experiment.metrics_secondary,
+            })
+
+            if (isPrimary) {
+                actions.loadPrimaryMetricsResults(true)
+            } else {
+                actions.loadSecondaryMetricsResults(true)
             }
         },
     })),
