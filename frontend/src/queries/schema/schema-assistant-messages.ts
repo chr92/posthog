@@ -288,10 +288,12 @@ export type AssistantTool =
     | 'create_feature_flag'
     | 'execute_sql'
     | 'switch_mode'
+    | 'summarize_sessions'
 
 export enum AgentMode {
     ProductAnalytics = 'product_analytics',
     SQL = 'sql',
+    SessionReplay = 'session_replay',
 }
 
 /** Exact possible `urls` keys for the `navigate` tool. */
