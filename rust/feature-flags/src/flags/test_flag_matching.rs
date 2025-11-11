@@ -4939,8 +4939,7 @@ mod tests {
             .unwrap();
         let same_device_result = matcher_same_device.get_match(&flag, None, None).unwrap();
         assert_eq!(
-            high_device_result.matches,
-            same_device_result.matches,
+            high_device_result.matches, same_device_result.matches,
             "device hashing should ignore distinct_id changes"
         );
 
