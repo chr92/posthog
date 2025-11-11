@@ -1,6 +1,6 @@
 import re
 from datetime import timedelta
-from typing import Union, cast
+from typing import Any, Union, cast
 
 from django.core.cache import cache
 from django.shortcuts import get_object_or_404
@@ -20,6 +20,7 @@ from posthog.schema import (
     EndpointRunRequest,
     HogQLQuery,
     HogQLQueryModifiers,
+    HogQLVariable,
     QueryRequest,
     QueryStatus,
     QueryStatusResponse,
@@ -399,7 +400,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
         if not saved_query.table:
             return False
 
-        if data.variables_values:
+        if data.variables:
             return False
 
         if data.refresh in ["force_blocking"]:
@@ -483,30 +484,49 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
             query_request_data, data.client_query_id, request, extra_result_fields=extra_fields
         )
 
+    def _parse_variables(self, query: dict, variables: dict[str, str] | None) -> dict[str, dict[str, Any]] | None:
+        if variables is None:
+            return None
+
+        query_variables = query.get("variables", None)
+        if query_variables is None:
+            return None
+
+        variables_override = {}
+        for variable_code_name, variable_value in variables.items():
+            variable_id = None
+            for query_variable_id, query_variable_value in query_variables.items():
+                if query_variable_value.get("code_name", None) == variable_code_name:
+                    variable_id = query_variable_id
+                    break
+
+            if variable_id is not None:
+                variables_override[variable_id] = HogQLVariable(
+                    variableId=variable_id,
+                    code_name=variable_code_name,
+                    value=variable_value,
+                    # TODO: this needs more attention!
+                    isNull=True if variable_value is None else None,
+                ).model_dump()
+        return variables_override if variables_override else None
+
     def _execute_inline_endpoint(
         self, endpoint: Endpoint, data: EndpointRunRequest, request: Request, query: dict
     ) -> Response:
         """Execute query directly against ClickHouse."""
-        data.variables_values = data.variables_values or {}
-
         try:
-            query_variables = query.get("variables", {})
-            for code_name, value in data.variables_values.items():
-                for variable in query_variables.values():
-                    if variable.get("code_name", "") == code_name:
-                        variable["value"] = value
-
             insight_query_override = data.query_override or {}
             for query_field, value in insight_query_override.items():
                 query[query_field] = value
 
+            variables_override = self._parse_variables(query, data.variables) if data.variables else None
             query_request_data = {
                 "client_query_id": data.client_query_id,
                 "filters_override": data.filters_override,
                 "name": endpoint.name,
                 "refresh": data.refresh,
                 "query": query,
-                "variables_override": data.variables_override,
+                "variables_override": variables_override,
             }
 
             return self._execute_query_and_respond(
@@ -580,8 +600,10 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
         return result
 
     def validate_run_request(self, data: EndpointRunRequest, endpoint: Endpoint) -> None:
-        if endpoint.query.get("kind") == "HogQLQuery" and data.query_override:
-            raise ValidationError("Query override is not supported for HogQL queries")
+        if endpoint.query.get("kind") == "HogQLQuery" and (data.query_override or data.filters_override):
+            raise ValidationError("Only variables_override is allowed on a HogQL query")
+        if endpoint.query.get("kind") != "HogQLQuery" and data.variables:
+            raise ValidationError("Only query_override and filters_override are allowed on an Insight query")
 
     @extend_schema(
         description="Get the last execution times in the past 6 months for multiple endpoints.",
