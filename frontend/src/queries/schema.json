@@ -1852,7 +1852,8 @@
                 "create_feature_flag",
                 "execute_sql",
                 "switch_mode",
-                "summarize_sessions"
+                "summarize_sessions",
+                "create_insight"
             ],
             "type": "string"
         },
