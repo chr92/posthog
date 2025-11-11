@@ -5,9 +5,10 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconCopy, IconExternal } from '@posthog/icons'
+import { IconCopy, IconExternal, IconEye } from '@posthog/icons'
 import { LemonButton, Link, Spinner, Tooltip } from '@posthog/lemon-ui'
 
+import { IconEyeHidden } from 'lib/lemon-ui/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
@@ -397,7 +398,7 @@ function parseUrls(text: string, traceId?: string): Array<TextPart | EventLinkPa
 /**
  * Render text with muted line numbers, clickable URLs and event links
  */
-function renderTextWithLinks(text: string, traceId?: string): JSX.Element[] {
+function renderTextWithLinks(text: string, traceId?: string, showLineNumbers: boolean = true): JSX.Element[] {
     const parts = parseUrls(text, traceId)
     const result: JSX.Element[] = []
 
@@ -432,19 +433,21 @@ function renderTextWithLinks(text: string, traceId?: string): JSX.Element[] {
                     const lineNumber = parseInt(linePrefix.slice(1, -1), 10)
                     result.push(
                         <span key={`line-${i}-${lineIdx}`} id={`line-${lineNumber}`}>
-                            <Tooltip title="Click to copy permalink to this line">
-                                <button
-                                    type="button"
-                                    className="text-muted hover:text-link cursor-pointer"
-                                    onClick={() => {
-                                        const url = new URL(window.location.href)
-                                        url.searchParams.set('line', lineNumber.toString())
-                                        copyToClipboard(url.toString(), 'permalink')
-                                    }}
-                                >
-                                    {linePrefix}
-                                </button>
-                            </Tooltip>
+                            {showLineNumbers && (
+                                <Tooltip title="Click to copy permalink to this line">
+                                    <button
+                                        type="button"
+                                        className="text-muted hover:text-link cursor-pointer"
+                                        onClick={() => {
+                                            const url = new URL(window.location.href)
+                                            url.searchParams.set('line', lineNumber.toString())
+                                            copyToClipboard(url.toString(), 'permalink')
+                                        }}
+                                    >
+                                        {linePrefix}
+                                    </button>
+                                </Tooltip>
+                            )}
                             {lineContent}
                         </span>
                     )
@@ -474,6 +477,7 @@ function NestedContentRenderer({
     setExpandedSegments,
     popoutSegment,
     setPopoutSegment,
+    showLineNumbers = true,
 }: {
     content: string
     traceId?: string
@@ -482,6 +486,7 @@ function NestedContentRenderer({
     setExpandedSegments: React.Dispatch<React.SetStateAction<Set<number | string>>>
     popoutSegment: number | string | null
     setPopoutSegment: React.Dispatch<React.SetStateAction<number | string | null>>
+    showLineNumbers?: boolean
 }): JSX.Element {
     const nestedSegments = parseTruncatedSegments(content)
 
@@ -511,7 +516,9 @@ function NestedContentRenderer({
                 const isNestedPopoutOpen = popoutSegment === nestedKey
 
                 if (nestedSeg.type === 'text') {
-                    return <span key={nestedIdx}>{renderTextWithLinks(nestedSeg.content, traceId)}</span>
+                    return (
+                        <span key={nestedIdx}>{renderTextWithLinks(nestedSeg.content, traceId, showLineNumbers)}</span>
+                    )
                 }
 
                 if (nestedSeg.type === 'tools_expandable') {
@@ -549,7 +556,7 @@ function NestedContentRenderer({
                             {'\n\n'}
                             {visibleTools.map((toolBlock, i) => (
                                 <span key={i}>
-                                    {renderTextWithLinks(toolBlock, traceId)}
+                                    {renderTextWithLinks(toolBlock, traceId, showLineNumbers)}
                                     {'\n\n'}
                                 </span>
                             ))}
@@ -568,7 +575,7 @@ function NestedContentRenderer({
                                         <div className="ml-4 mt-2 mb-2">
                                             {hiddenTools.map((toolBlock, i) => (
                                                 <span key={i}>
-                                                    {renderTextWithLinks(toolBlock, traceId)}
+                                                    {renderTextWithLinks(toolBlock, traceId, showLineNumbers)}
                                                     {'\n\n'}
                                                 </span>
                                             ))}
@@ -585,7 +592,7 @@ function NestedContentRenderer({
                     <span key={nestedIdx}>
                         {isNestedExpanded ? (
                             <>
-                                {renderTextWithLinks(nestedSeg.fullContent || '', traceId)}
+                                {renderTextWithLinks(nestedSeg.fullContent || '', traceId, showLineNumbers)}
                                 <button
                                     onClick={() => toggleNestedSegment(nestedIdx)}
                                     className="text-link hover:underline cursor-pointer ml-1"
@@ -664,6 +671,7 @@ export function TextViewDisplay({
     const [copied, setCopied] = useState(false)
     const [expandedSegments, setExpandedSegments] = useState<Set<number | string>>(new Set())
     const [popoutSegment, setPopoutSegment] = useState<number | string | null>(null)
+    const [showLineNumbers, setShowLineNumbers] = useState(false)
 
     // Get trace ID for event links
     const traceId = trace?.id
@@ -801,6 +809,15 @@ export function TextViewDisplay({
                 <LemonButton
                     type="secondary"
                     size="xsmall"
+                    icon={showLineNumbers ? <IconEyeHidden /> : <IconEye />}
+                    onClick={() => setShowLineNumbers(!showLineNumbers)}
+                    tooltip={showLineNumbers ? 'Hide line numbers' : 'Show line numbers'}
+                >
+                    {showLineNumbers ? 'Hide' : 'Show'} line numbers
+                </LemonButton>
+                <LemonButton
+                    type="secondary"
+                    size="xsmall"
                     icon={<IconCopy />}
                     onClick={handleCopy}
                     tooltip={copied ? 'Copied!' : 'Copy text representation'}
@@ -815,7 +832,7 @@ export function TextViewDisplay({
                         const nextSegment = segments[index + 1]
                         const content =
                             nextSegment?.type === 'gen_expandable' ? segment.content.trimEnd() : segment.content
-                        return <span key={index}>{renderTextWithLinks(content, traceId)}</span>
+                        return <span key={index}>{renderTextWithLinks(content, traceId, showLineNumbers)}</span>
                     }
                     if (segment.type === 'gen_expandable') {
                         const isExpanded = expandedSegments.has(index)
@@ -849,6 +866,7 @@ export function TextViewDisplay({
                                             setExpandedSegments={setExpandedSegments}
                                             popoutSegment={popoutSegment}
                                             setPopoutSegment={setPopoutSegment}
+                                            showLineNumbers={showLineNumbers}
                                         />
                                     </div>
                                 )}
@@ -895,7 +913,7 @@ export function TextViewDisplay({
                                 {/* Show first 5 tools inline */}
                                 {visibleTools.map((toolBlock, i) => (
                                     <span key={i}>
-                                        {renderTextWithLinks(toolBlock, traceId)}
+                                        {renderTextWithLinks(toolBlock, traceId, showLineNumbers)}
                                         {'\n\n'}
                                     </span>
                                 ))}
@@ -914,7 +932,7 @@ export function TextViewDisplay({
                                             <div className="ml-4 mt-2 mb-2">
                                                 {hiddenTools.map((toolBlock, i) => (
                                                     <span key={i}>
-                                                        {renderTextWithLinks(toolBlock, traceId)}
+                                                        {renderTextWithLinks(toolBlock, traceId, showLineNumbers)}
                                                         {'\n\n'}
                                                     </span>
                                                 ))}
@@ -932,7 +950,7 @@ export function TextViewDisplay({
                         <span key={index}>
                             {isExpanded ? (
                                 <>
-                                    {renderTextWithLinks(segment.fullContent || '', traceId)}
+                                    {renderTextWithLinks(segment.fullContent || '', traceId, showLineNumbers)}
                                     <button
                                         onClick={() => toggleSegment(index)}
                                         className="text-link hover:underline cursor-pointer ml-1"

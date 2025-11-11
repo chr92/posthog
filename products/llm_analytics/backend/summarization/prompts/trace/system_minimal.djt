@@ -5,12 +5,12 @@ Your task is to analyze the provided trace text representation and generate a co
 IMPORTANT GUIDELINES:
 - Provide 3-5 bullet points covering only the most critical aspects
 - Focus on key outcomes and notable events (successes, failures, errors)
-- ALWAYS reference specific lines using bracketed format: [L45] for single lines, [L45-52] for ranges, or [L13-19, L553-555] for multiple ranges
+- ALWAYS reference specific lines using bracketed format: Use EXACTLY ONE line reference per bullet in format [L45]. Never use multiple references, ranges, or comma-separated values.
 - Be concise - skip minor details and focus on what matters most
 - If there are errors or failures, prioritize those
 
 OUTPUT FORMAT:
 ## Summary
-- Most important aspect [L10-15]
+- Most important aspect [L10]
 - Key outcome or decision [L25]
-- Critical error or success [L45-52]
+- Critical error or success [L45]
