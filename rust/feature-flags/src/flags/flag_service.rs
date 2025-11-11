@@ -346,6 +346,7 @@ mod tests {
                     version: Some(1),
                     evaluation_runtime: Some("all".to_string()),
                     evaluation_tags: None,
+                    bucketing_identifier: None,
                 },
                 FeatureFlag {
                     id: 2,
@@ -366,6 +367,7 @@ mod tests {
                     version: Some(1),
                     evaluation_runtime: Some("all".to_string()),
                     evaluation_tags: None,
+                    bucketing_identifier: None,
                 },
                 FeatureFlag {
                     id: 3,
@@ -397,6 +399,7 @@ mod tests {
                     version: Some(1),
                     evaluation_runtime: Some("all".to_string()),
                     evaluation_tags: None,
+                    bucketing_identifier: None,
                 },
             ],
         };

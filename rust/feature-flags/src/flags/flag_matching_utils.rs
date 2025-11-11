@@ -1364,6 +1364,7 @@ mod tests {
             version: flag.version,
             evaluation_runtime: flag.evaluation_runtime,
             evaluation_tags: flag.evaluation_tags,
+            bucketing_identifier: flag.bucketing_identifier,
         };
 
         // Insert the feature flag into the database
@@ -1467,6 +1468,7 @@ mod tests {
                 version: Some(1),
                 evaluation_runtime: None,
                 evaluation_tags: None,
+                bucketing_identifier: None,
             };
             context
                 .insert_flag(team.id, Some(flag_row))
@@ -1583,6 +1585,7 @@ mod tests {
                 version: Some(1),
                 evaluation_runtime: None,
                 evaluation_tags: None,
+                bucketing_identifier: None,
             };
             context
                 .insert_flag(team.id, Some(flag_row))
@@ -1704,6 +1707,7 @@ mod tests {
             version: Some(1),
             evaluation_runtime: None,
             evaluation_tags: None,
+            bucketing_identifier: None,
         };
 
         let inactive_flag = FeatureFlagRow {
@@ -1718,6 +1722,7 @@ mod tests {
             version: Some(1),
             evaluation_runtime: None,
             evaluation_tags: None,
+            bucketing_identifier: None,
         };
 
         let deleted_flag = FeatureFlagRow {
@@ -1732,6 +1737,7 @@ mod tests {
             version: Some(1),
             evaluation_runtime: None,
             evaluation_tags: None,
+            bucketing_identifier: None,
         };
 
         let no_continuity_flag = FeatureFlagRow {
@@ -1746,6 +1752,7 @@ mod tests {
             version: Some(1),
             evaluation_runtime: None,
             evaluation_tags: None,
+            bucketing_identifier: None,
         };
 
         context
@@ -1838,6 +1845,7 @@ mod tests {
             version: Some(1),
             evaluation_runtime: None,
             evaluation_tags: None,
+            bucketing_identifier: None,
         };
         context
             .insert_flag(team.id, Some(flag_row))
@@ -1923,6 +1931,7 @@ mod tests {
             version: Some(1),
             evaluation_runtime: None,
             evaluation_tags: None,
+            bucketing_identifier: None,
         };
         context
             .insert_flag(team.id, Some(flag_row))

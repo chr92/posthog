@@ -167,6 +167,7 @@ async fn test_evaluate_feature_flags() {
         version: Some(1),
         evaluation_runtime: Some("all".to_string()),
         evaluation_tags: None,
+        bucketing_identifier: None,
     };
 
     let feature_flag_list = FeatureFlagList { flags: vec![flag] };
@@ -178,6 +179,7 @@ async fn test_evaluate_feature_flags() {
         team_id: team.id,
         project_id: team.project_id(),
         distinct_id: "user123".to_string(),
+        device_id: None,
         feature_flags: feature_flag_list,
         persons_reader: reader.clone(),
         persons_writer: writer.clone(),
@@ -258,6 +260,7 @@ async fn test_evaluate_feature_flags_with_errors() {
         version: Some(1),
         evaluation_runtime: Some("all".to_string()),
         evaluation_tags: None,
+        bucketing_identifier: None,
     }];
 
     let feature_flag_list = FeatureFlagList { flags };
@@ -267,6 +270,7 @@ async fn test_evaluate_feature_flags_with_errors() {
         team_id: team.id,
         project_id: team.project_id(),
         distinct_id: "user123".to_string(),
+        device_id: None,
         feature_flags: feature_flag_list,
         persons_reader: context.persons_reader.clone(),
         persons_writer: context.persons_writer.clone(),
@@ -635,6 +639,7 @@ async fn test_evaluate_feature_flags_multiple_flags() {
             version: Some(1),
             evaluation_runtime: Some("all".to_string()),
             evaluation_tags: None,
+            bucketing_identifier: None,
         },
         FeatureFlag {
             name: Some("Flag 2".to_string()),
@@ -659,6 +664,7 @@ async fn test_evaluate_feature_flags_multiple_flags() {
             version: Some(1),
             evaluation_runtime: Some("all".to_string()),
             evaluation_tags: None,
+            bucketing_identifier: None,
         },
     ];
 
@@ -668,6 +674,7 @@ async fn test_evaluate_feature_flags_multiple_flags() {
         team_id: team.id,
         project_id: team.project_id(),
         distinct_id: distinct_id.clone(),
+        device_id: None,
         feature_flags: feature_flag_list,
         persons_reader: reader.clone(),
         persons_writer: writer.clone(),
@@ -736,6 +743,7 @@ async fn test_evaluate_feature_flags_details() {
             version: Some(1),
             evaluation_runtime: Some("all".to_string()),
             evaluation_tags: None,
+            bucketing_identifier: None,
         },
         FeatureFlag {
             name: Some("Flag 2".to_string()),
@@ -760,6 +768,7 @@ async fn test_evaluate_feature_flags_details() {
             version: Some(1),
             evaluation_runtime: Some("all".to_string()),
             evaluation_tags: None,
+            bucketing_identifier: None,
         },
     ];
 
@@ -769,6 +778,7 @@ async fn test_evaluate_feature_flags_details() {
         team_id: team.id,
         project_id: team.project_id(),
         distinct_id: distinct_id.clone(),
+        device_id: None,
         feature_flags: feature_flag_list,
         persons_reader: reader.clone(),
         persons_writer: writer.clone(),
@@ -905,6 +915,7 @@ async fn test_evaluate_feature_flags_with_overrides() {
         version: Some(1),
         evaluation_runtime: Some("all".to_string()),
         evaluation_tags: None,
+        bucketing_identifier: None,
     };
     let feature_flag_list = FeatureFlagList { flags: vec![flag] };
 
@@ -921,6 +932,7 @@ async fn test_evaluate_feature_flags_with_overrides() {
         team_id: team.id,
         project_id: team.project_id(),
         distinct_id: "user123".to_string(),
+        device_id: None,
         feature_flags: feature_flag_list,
         persons_reader: context.persons_reader.clone(),
         persons_writer: context.persons_writer.clone(),
@@ -1002,6 +1014,7 @@ async fn test_long_distinct_id() {
         version: Some(1),
         evaluation_runtime: Some("all".to_string()),
         evaluation_tags: None,
+        bucketing_identifier: None,
     };
 
     let feature_flag_list = FeatureFlagList { flags: vec![flag] };
@@ -1010,6 +1023,7 @@ async fn test_long_distinct_id() {
         team_id: team.id,
         project_id: team.project_id(),
         distinct_id: long_id,
+        device_id: None,
         feature_flags: feature_flag_list,
         persons_reader: context.persons_reader.clone(),
         persons_writer: context.persons_writer.clone(),
@@ -1175,6 +1189,7 @@ async fn test_fetch_and_filter_flags() {
             version: Some(1),
             evaluation_runtime: Some("all".to_string()),
             evaluation_tags: None,
+            bucketing_identifier: None,
         },
         FeatureFlag {
             name: Some("Survey Flag 2".to_string()),
@@ -1188,6 +1203,7 @@ async fn test_fetch_and_filter_flags() {
             version: Some(1),
             evaluation_runtime: Some("all".to_string()),
             evaluation_tags: None,
+            bucketing_identifier: None,
         },
         FeatureFlag {
             name: Some("Regular Flag 1".to_string()),
@@ -1201,6 +1217,7 @@ async fn test_fetch_and_filter_flags() {
             version: Some(1),
             evaluation_runtime: Some("all".to_string()),
             evaluation_tags: None,
+            bucketing_identifier: None,
         },
         FeatureFlag {
             name: Some("Regular Flag 2".to_string()),
@@ -1214,6 +1231,7 @@ async fn test_fetch_and_filter_flags() {
             version: Some(1),
             evaluation_runtime: Some("all".to_string()),
             evaluation_tags: None,
+            bucketing_identifier: None,
         },
     ];
 

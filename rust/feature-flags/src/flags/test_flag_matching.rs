@@ -83,6 +83,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -104,6 +105,7 @@ mod tests {
         let router2 = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             not_matching_distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router2,
@@ -125,6 +127,7 @@ mod tests {
         let router3 = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "other_distinct_id".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router3,
@@ -188,6 +191,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -270,6 +274,7 @@ mod tests {
 
         let mut matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             context.create_postgres_router(),
@@ -353,6 +358,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -511,6 +517,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -667,6 +674,7 @@ mod tests {
 
         let mut matcher = FeatureFlagMatcher::new(
             "test_user_distinct_id".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             context.create_postgres_router(),
@@ -791,6 +799,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -944,6 +953,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -1036,6 +1046,7 @@ mod tests {
 
         let matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             1,
             1,
             context.create_postgres_router(),
@@ -1072,6 +1083,7 @@ mod tests {
         let router = context.create_postgres_router();
         let matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -1123,6 +1135,7 @@ mod tests {
 
         let matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             1,
             1,
             context.create_postgres_router(),
@@ -1182,6 +1195,7 @@ mod tests {
 
         let mut matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             1,
             1,
             context.create_postgres_router(),
@@ -1241,6 +1255,7 @@ mod tests {
             version: Some(1),
             evaluation_runtime: Some("all".to_string()),
             evaluation_tags: None,
+            bucketing_identifier: None,
         }
     }
 
@@ -1289,6 +1304,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -1369,6 +1385,7 @@ mod tests {
             handles.push(tokio::spawn(async move {
                 let matcher = FeatureFlagMatcher::new(
                     format!("test_user_{i}"),
+                    None, // device_id
                     team_id,
                     project_id,
                     router,
@@ -1451,6 +1468,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -1501,6 +1519,7 @@ mod tests {
 
         let matcher = FeatureFlagMatcher::new(
             "".to_string(),
+            None, // device_id
             1,
             1,
             context.create_postgres_router(),
@@ -1548,6 +1567,7 @@ mod tests {
 
         let matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             1,
             1,
             context.create_postgres_router(),
@@ -1602,6 +1622,7 @@ mod tests {
 
         let mut matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             1,
             1,
             context.create_postgres_router(),
@@ -1680,6 +1701,7 @@ mod tests {
 
         let matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             context.create_postgres_router(),
@@ -1744,6 +1766,7 @@ mod tests {
 
         let matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             context.create_postgres_router(),
@@ -1790,6 +1813,7 @@ mod tests {
 
         let matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             1,
             1,
             context.create_postgres_router(),
@@ -1870,6 +1894,7 @@ mod tests {
 
         let mut matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             context.create_postgres_router(),
@@ -2103,6 +2128,7 @@ mod tests {
             let router = context.create_postgres_router();
             let mut matcher = FeatureFlagMatcher::new(
                 user_id.to_string(),
+                None, // device_id
                 team.id,
                 team.project_id(),
                 router,
@@ -2218,6 +2244,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher_test_id = FeatureFlagMatcher::new(
             "test_id".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router.clone(),
@@ -2228,6 +2255,7 @@ mod tests {
 
         let mut matcher_example_id = FeatureFlagMatcher::new(
             "lil_id".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router.clone(),
@@ -2238,6 +2266,7 @@ mod tests {
 
         let mut matcher_another_id = FeatureFlagMatcher::new(
             "another_id".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -2354,6 +2383,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "test_id".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -2465,6 +2495,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher_test_id = FeatureFlagMatcher::new(
             "test_id".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router.clone(),
@@ -2475,6 +2506,7 @@ mod tests {
 
         let mut matcher_example_id = FeatureFlagMatcher::new(
             "lil_id".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router.clone(),
@@ -2485,6 +2517,7 @@ mod tests {
 
         let mut matcher_another_id = FeatureFlagMatcher::new(
             "another_id".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -2612,6 +2645,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -2708,6 +2742,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -2804,6 +2839,7 @@ mod tests {
         let router = context.create_postgres_router();
         let matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -2921,6 +2957,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -3017,6 +3054,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -3113,6 +3151,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -3201,6 +3240,7 @@ mod tests {
         let router = context.create_postgres_router();
         let matcher = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -3284,6 +3324,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -3382,6 +3423,7 @@ mod tests {
         let router = context.create_postgres_router();
         let matcher = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -3474,6 +3516,7 @@ mod tests {
         let router = context.create_postgres_router();
         let result = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -3566,6 +3609,7 @@ mod tests {
         let router = context.create_postgres_router();
         let result = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -3695,6 +3739,7 @@ mod tests {
         let router = context.create_postgres_router();
         let result = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -3801,6 +3846,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -4032,6 +4078,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "example_id".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -4054,6 +4101,7 @@ mod tests {
         let router2 = context.create_postgres_router();
         let mut matcher2 = FeatureFlagMatcher::new(
             "example_id2".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router2,
@@ -4161,12 +4209,14 @@ mod tests {
             version: Some(1),
             evaluation_runtime: Some("all".to_string()),
             evaluation_tags: None,
+            bucketing_identifier: None,
         };
 
         // Test user "11" - should get first-variant
         let router = context.create_postgres_router();
         let matcher = FeatureFlagMatcher::new(
             "11".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -4190,6 +4240,7 @@ mod tests {
         let router = context.create_postgres_router();
         let matcher = FeatureFlagMatcher::new(
             "example_id".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -4213,6 +4264,7 @@ mod tests {
         let router = context.create_postgres_router();
         let matcher = FeatureFlagMatcher::new(
             "3".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -4308,6 +4360,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -4374,6 +4427,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "nonexistent_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -4445,6 +4499,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher_numeric = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -4465,6 +4520,7 @@ mod tests {
         let router2 = context.create_postgres_router();
         let mut matcher_string = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router2,
@@ -4497,6 +4553,7 @@ mod tests {
         let router3 = context.create_postgres_router();
         let mut matcher_float = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router3,
@@ -4518,6 +4575,7 @@ mod tests {
         let router4 = context.create_postgres_router();
         let mut matcher_bool = FeatureFlagMatcher::new(
             "test_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router4,
@@ -4662,6 +4720,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "super_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -4687,6 +4746,7 @@ mod tests {
         let router2 = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "posthog_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router2,
@@ -4712,6 +4772,7 @@ mod tests {
         let router3 = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "regular_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router3,
@@ -4784,6 +4845,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -4904,6 +4966,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -4949,6 +5012,7 @@ mod tests {
         let router2 = context.create_postgres_router();
         let mut matcher2 = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router2,
@@ -4983,6 +5047,7 @@ mod tests {
         let router3 = context.create_postgres_router();
         let mut matcher3 = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router3,
@@ -5019,6 +5084,7 @@ mod tests {
         let router4 = context.create_postgres_router();
         let mut matcher4 = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router4,
@@ -5172,6 +5238,7 @@ mod tests {
         let router = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -5216,6 +5283,7 @@ mod tests {
         let router2 = context.create_postgres_router();
         let mut matcher2 = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router2,
@@ -5256,6 +5324,7 @@ mod tests {
         let router3 = context.create_postgres_router();
         let mut matcher3 = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router3,
@@ -5292,6 +5361,7 @@ mod tests {
         let router4 = context.create_postgres_router();
         let mut matcher4 = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router4,
@@ -5332,6 +5402,7 @@ mod tests {
         let router5 = context.create_postgres_router();
         let mut matcher5 = FeatureFlagMatcher::new(
             distinct_id.clone(),
+            None, // device_id
             team.id,
             team.project_id(),
             router5,
@@ -5428,6 +5499,7 @@ mod tests {
             version: Some(1),
             evaluation_runtime: Some("all".to_string()),
             evaluation_tags: None,
+            bucketing_identifier: None,
         };
 
         let router = context.create_postgres_router();
@@ -5435,6 +5507,7 @@ mod tests {
         // Test 1: User with email "specific@example.com" should match first condition
         let matcher = FeatureFlagMatcher::new(
             "specific_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router.clone(),
@@ -5465,6 +5538,7 @@ mod tests {
         // Test 2: Different user should match second condition (catch-all)
         let matcher2 = FeatureFlagMatcher::new(
             "other_user".to_string(),
+            None, // device_id
             team.id,
             team.project_id(),
             router,
@@ -5510,6 +5584,7 @@ mod tests {
         let distinct_id = "user_distinct_id".to_string();
         let mut matcher = FeatureFlagMatcher::new(
             distinct_id,
+            None, // device_id
             team.id,
             team.project_id(),
             router,
