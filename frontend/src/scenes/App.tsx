@@ -10,6 +10,7 @@ import { apiStatusLogic } from 'lib/logic/apiStatusLogic'
 import { eventIngestionRestrictionLogic } from 'lib/logic/eventIngestionRestrictionLogic'
 import { appLogic } from 'scenes/appLogic'
 import { appScenes } from 'scenes/appScenes'
+import { AIOnlyModeWrapper } from 'scenes/max/AIOnlyModeWrapper'
 import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
 import { sceneLogic } from 'scenes/sceneLogic'
 import { userLogic } from 'scenes/userLogic'
@@ -32,10 +33,10 @@ export function App(): JSX.Element | null {
 
     if (showApp) {
         return (
-            <>
+            <AIOnlyModeWrapper>
                 <AppScene />
                 {showingDevTools ? <KeaDevtools /> : null}
-            </>
+            </AIOnlyModeWrapper>
         )
     }
 

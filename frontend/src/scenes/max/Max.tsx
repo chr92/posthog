@@ -74,9 +74,14 @@ export function Max({ tabId }: { tabId?: string }): JSX.Element {
 export interface MaxInstanceProps {
     sidePanel?: boolean
     tabId: string
+    AIOnlyMode?: boolean
 }
 
-export const MaxInstance = React.memo(function MaxInstance({ sidePanel, tabId }: MaxInstanceProps): JSX.Element {
+export const MaxInstance = React.memo(function MaxInstance({
+    sidePanel,
+    tabId,
+    AIOnlyMode,
+}: MaxInstanceProps): JSX.Element {
     const {
         threadVisible,
         conversationHistoryVisible,
@@ -182,7 +187,7 @@ export const MaxInstance = React.memo(function MaxInstance({ sidePanel, tabId }:
                             )}
                         </h3>
                     </div>
-                    {!conversationHistoryVisible && !threadVisible && (
+                    {!conversationHistoryVisible && !threadVisible && !AIOnlyMode && (
                         <LemonButton
                             size="small"
                             icon={<IconPlus />}
@@ -191,18 +196,20 @@ export const MaxInstance = React.memo(function MaxInstance({ sidePanel, tabId }:
                             tooltipPlacement="bottom"
                         />
                     )}
-                    <LemonButton
-                        size="small"
-                        sideIcon={<IconExternal />}
-                        to={urls.max(conversationId ?? undefined)}
-                        onClick={() => {
-                            closeSidePanel()
-                            startNewConversation()
-                        }}
-                        targetBlank
-                        tooltip="Open as main focus"
-                        tooltipPlacement="bottom-end"
-                    />
+                    {AIOnlyMode ? undefined : (
+                        <LemonButton
+                            size="small"
+                            sideIcon={<IconExternal />}
+                            to={urls.max(conversationId ?? undefined)}
+                            onClick={() => {
+                                closeSidePanel()
+                                startNewConversation()
+                            }}
+                            targetBlank
+                            tooltip="Open as main focus"
+                            tooltipPlacement="bottom-end"
+                        />
+                    )}
                 </div>
             </SidePanelPaneHeader>
             {content}
