@@ -75,7 +75,13 @@ function AppScene(): JSX.Element | null {
     if (featureFlags[FEATURE_FLAGS.AI_ONLY_MODE] && !hasExitedAIOnlyMode) {
         return (
             <>
-                <div className="fixed inset-0 bg-surface-secondary flex flex-col overflow-auto">
+                <div
+                    className="fixed inset-0 bg-surface-secondary flex flex-col overflow-auto"
+                    ref={() => {
+                        // HACK: Normally DebugNotice removes the HTML-level debug bar, but in this case we don't have the nav rendering DebugNotice
+                        document.getElementById('bottom-notice')?.remove()
+                    }}
+                >
                     <MaxInstance tabId="ai-only-mode" sidePanel isAIOnlyMode />
                 </div>
                 {toastContainer}
