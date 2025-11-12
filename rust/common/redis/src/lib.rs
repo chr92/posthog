@@ -5,22 +5,12 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use thiserror::Error;
-use tokio::time::timeout;
 use tracing::warn;
 
 // Re-export ErrorKind and RetryMethod so consumers can construct CustomRedisError in tests
 // and understand retry behavior
 pub use redis::ErrorKind as RedisErrorKind;
 pub use redis::RetryMethod;
-
-const DEFAULT_REDIS_TIMEOUT_MILLISECS: u64 = 100;
-
-fn get_redis_timeout_ms() -> u64 {
-    std::env::var("REDIS_TIMEOUT_MS")
-        .ok()
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(DEFAULT_REDIS_TIMEOUT_MILLISECS)
-}
 
 #[derive(Error, Debug, Clone)]
 pub enum CustomRedisError {
@@ -42,13 +32,11 @@ impl From<serde_pickle::Error> for CustomRedisError {
 
 impl From<RedisError> for CustomRedisError {
     fn from(err: RedisError) -> Self {
-        CustomRedisError::Redis(Arc::new(err))
-    }
-}
-
-impl From<tokio::time::error::Elapsed> for CustomRedisError {
-    fn from(_: tokio::time::error::Elapsed) -> Self {
-        CustomRedisError::Timeout
+        if err.is_timeout() {
+            CustomRedisError::Timeout
+        } else {
+            CustomRedisError::Redis(Arc::new(err))
+        }
     }
 }
 
@@ -264,12 +252,25 @@ impl RedisClient {
     /// - Format: Pickle (Django-compatible)
     /// - Compression: Disabled
     ///
+    /// Create a new RedisClient with timeout configuration
+    ///
+    /// # Arguments
+    /// * `addr` - Redis connection string
+    /// * `response_timeout` - Timeout for Redis command responses. `Duration::ZERO` means no timeout (blocks indefinitely).
+    /// * `connection_timeout` - Timeout for establishing connections. `Duration::ZERO` means no timeout (blocks indefinitely).
+    ///
     /// For Django-compatible compression, use `with_config()` with `CompressionConfig::default()`
-    pub async fn new(addr: String) -> Result<RedisClient, CustomRedisError> {
+    pub async fn new(
+        addr: String,
+        response_timeout: Duration,
+        connection_timeout: Duration,
+    ) -> Result<RedisClient, CustomRedisError> {
         Self::with_config(
             addr,
             CompressionConfig::disabled(),
             RedisValueFormat::default(),
+            response_timeout,
+            connection_timeout,
         )
         .await
     }
@@ -284,23 +285,39 @@ impl RedisClient {
     /// # Examples
     /// ```no_run
     /// use common_redis::{RedisClient, CompressionConfig, RedisValueFormat};
+    /// use std::time::Duration;
     ///
     /// # async fn example() {
-    /// // Default settings
-    /// let client = RedisClient::new("redis://localhost:6379".to_string()).await.unwrap();
+    /// // With timeouts (100ms response, 5000ms connection)
+    /// let client = RedisClient::new(
+    ///     "redis://localhost:6379".to_string(),
+    ///     Duration::from_millis(100),
+    ///     Duration::from_millis(5000)
+    /// ).await.unwrap();
     ///
-    /// // Custom compression only
+    /// // No timeouts (blocks indefinitely) - use Duration::ZERO
+    /// let client = RedisClient::new(
+    ///     "redis://localhost:6379".to_string(),
+    ///     Duration::ZERO,
+    ///     Duration::ZERO
+    /// ).await.unwrap();
+    ///
+    /// // Custom compression with timeouts
     /// let client = RedisClient::with_config(
     ///     "redis://localhost:6379".to_string(),
     ///     CompressionConfig::new(true, 1024, 3),
     ///     RedisValueFormat::default(),
+    ///     Duration::from_millis(100),
+    ///     Duration::from_millis(5000),
     /// ).await.unwrap();
     ///
-    /// // Custom format only
+    /// // Custom format with no timeouts
     /// let client = RedisClient::with_config(
     ///     "redis://localhost:6379".to_string(),
     ///     CompressionConfig::default(),
     ///     RedisValueFormat::Utf8,
+    ///     Duration::ZERO,
+    ///     Duration::ZERO,
     /// ).await.unwrap();
     ///
     /// // Full custom configuration
@@ -308,6 +325,8 @@ impl RedisClient {
     ///     "redis://localhost:6379".to_string(),
     ///     CompressionConfig::new(true, 1024, 3),
     ///     RedisValueFormat::Utf8,
+    ///     Duration::from_millis(100),
+    ///     Duration::from_millis(5000),
     /// ).await.unwrap();
     /// # }
     /// ```
@@ -315,9 +334,27 @@ impl RedisClient {
         addr: String,
         compression: CompressionConfig,
         format: RedisValueFormat,
+        response_timeout: Duration,
+        connection_timeout: Duration,
     ) -> Result<RedisClient, CustomRedisError> {
         let client = redis::Client::open(addr)?;
-        let connection = client.get_multiplexed_async_connection().await?;
+
+        // Use Redis 0.32.7 native timeout configuration
+        // Duration::ZERO means no timeout (blocks indefinitely)
+        let mut config = redis::AsyncConnectionConfig::new();
+
+        if !response_timeout.is_zero() {
+            config = config.set_response_timeout(response_timeout);
+        }
+
+        if !connection_timeout.is_zero() {
+            config = config.set_connection_timeout(connection_timeout);
+        }
+
+        let connection = client
+            .get_multiplexed_async_connection_with_config(&config)
+            .await?;
+
         Ok(RedisClient {
             connection,
             compression,
@@ -402,9 +439,8 @@ impl Client for RedisClient {
         max: String,
     ) -> Result<Vec<String>, CustomRedisError> {
         let mut conn = self.connection.clone();
-        let results = conn.zrangebyscore(k, min, max);
-        let fut = timeout(Duration::from_millis(get_redis_timeout_ms()), results).await?;
-        Ok(fut?)
+        let results = conn.zrangebyscore(k, min, max).await?;
+        Ok(results)
     }
 
     async fn hincrby(
@@ -415,9 +451,8 @@ impl Client for RedisClient {
     ) -> Result<(), CustomRedisError> {
         let mut conn = self.connection.clone();
         let count = count.unwrap_or(1);
-        let results = conn.hincr(k, v, count);
-        let fut = timeout(Duration::from_millis(get_redis_timeout_ms()), results).await?;
-        fut.map_err(|e| e.into())
+        conn.hincr::<_, _, _, ()>(k, v, count).await?;
+        Ok(())
     }
 
     async fn get(&self, k: String) -> Result<String, CustomRedisError> {
@@ -430,16 +465,12 @@ impl Client for RedisClient {
         format: RedisValueFormat,
     ) -> Result<String, CustomRedisError> {
         let mut conn = self.connection.clone();
-        let results = conn.get(k);
-        let fut: Result<Vec<u8>, RedisError> =
-            timeout(Duration::from_millis(get_redis_timeout_ms()), results).await?;
+        let raw_bytes: Vec<u8> = conn.get(k).await?;
 
         // return NotFound error when empty
-        if matches!(&fut, Ok(v) if v.is_empty()) {
+        if raw_bytes.is_empty() {
             return Err(CustomRedisError::NotFound);
         }
-
-        let raw_bytes = fut?;
 
         // Always attempt decompression - handles both compressed and uncompressed data gracefully
         // This ensures clients can read data regardless of compression settings used when writing
@@ -463,16 +494,12 @@ impl Client for RedisClient {
 
     async fn get_raw_bytes(&self, k: String) -> Result<Vec<u8>, CustomRedisError> {
         let mut conn = self.connection.clone();
-        let results = conn.get(k);
-        let fut: Result<Vec<u8>, RedisError> =
-            timeout(Duration::from_millis(get_redis_timeout_ms()), results).await?;
+        let raw_bytes: Vec<u8> = conn.get(k).await?;
 
         // return NotFound error when empty
-        if matches!(&fut, Ok(v) if v.is_empty()) {
+        if raw_bytes.is_empty() {
             return Err(CustomRedisError::NotFound);
         }
-
-        let raw_bytes = fut?;
 
         // Always attempt decompression - handles both compressed and uncompressed data gracefully
         // This ensures clients can read data regardless of compression settings used when writing
@@ -492,18 +519,16 @@ impl Client for RedisClient {
         let final_bytes = self.serialize_and_compress(v, format)?;
 
         let mut conn = self.connection.clone();
-        let results = conn.set(k, final_bytes);
-        let fut = timeout(Duration::from_millis(get_redis_timeout_ms()), results).await?;
-        Ok(fut?)
+        conn.set::<_, _, ()>(k, final_bytes).await?;
+        Ok(())
     }
 
     async fn setex(&self, k: String, v: String, seconds: u64) -> Result<(), CustomRedisError> {
         let final_bytes = self.serialize_and_compress(v, self.format)?;
 
         let mut conn = self.connection.clone();
-        let results = conn.set_ex(k, final_bytes, seconds);
-        let fut = timeout(Duration::from_millis(get_redis_timeout_ms()), results).await?;
-        Ok(fut?)
+        conn.set_ex::<_, _, ()>(k, final_bytes, seconds).await?;
+        Ok(())
     }
 
     async fn set_nx_ex(
@@ -528,17 +553,14 @@ impl Client for RedisClient {
         let seconds_usize = seconds as usize;
 
         // Use SET with both NX and EX options
-        let result: Result<Option<String>, RedisError> = timeout(
-            Duration::from_millis(get_redis_timeout_ms()),
-            redis::cmd("SET")
-                .arg(&k)
-                .arg(&final_bytes)
-                .arg("EX")
-                .arg(seconds_usize)
-                .arg("NX")
-                .query_async(&mut conn),
-        )
-        .await?;
+        let result: Result<Option<String>, RedisError> = redis::cmd("SET")
+            .arg(&k)
+            .arg(&final_bytes)
+            .arg("EX")
+            .arg(seconds_usize)
+            .arg("NX")
+            .query_async(&mut conn)
+            .await;
 
         match result {
             Ok(Some(_)) => Ok(true), // Key was set successfully
@@ -549,18 +571,15 @@ impl Client for RedisClient {
 
     async fn del(&self, k: String) -> Result<(), CustomRedisError> {
         let mut conn = self.connection.clone();
-        let results = conn.del(k);
-        let fut = timeout(Duration::from_millis(get_redis_timeout_ms()), results).await?;
-        fut.map_err(|e| e.into())
+        conn.del::<_, ()>(k).await?;
+        Ok(())
     }
 
     async fn hget(&self, k: String, field: String) -> Result<String, CustomRedisError> {
         let mut conn = self.connection.clone();
-        let results = conn.hget(k, field);
-        let fut: Result<Option<String>, RedisError> =
-            timeout(Duration::from_millis(get_redis_timeout_ms()), results).await?;
+        let result: Option<String> = conn.hget(k, field).await?;
 
-        match fut? {
+        match result {
             Some(value) => Ok(value),
             None => Err(CustomRedisError::NotFound),
         }
@@ -568,10 +587,8 @@ impl Client for RedisClient {
 
     async fn scard(&self, k: String) -> Result<u64, CustomRedisError> {
         let mut conn = self.connection.clone();
-        let results = conn.scard(k);
-        timeout(Duration::from_millis(get_redis_timeout_ms()), results)
-            .await?
-            .map_err(|e| e.into())
+        let result = conn.scard(k).await?;
+        Ok(result)
     }
 }
 
