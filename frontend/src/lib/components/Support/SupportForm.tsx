@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useRef } from 'react'
 
-import { IconBug, IconDocument, IconInfo, IconQuestion } from '@posthog/icons'
+import { IconBug, IconDocument, IconInfo, IconQuestion, IconRecord } from '@posthog/icons'
 import {
     LemonBanner,
     LemonInput,
@@ -58,9 +58,14 @@ const SUPPORT_TICKET_KIND_TO_PROMPT: Record<SupportTicketKind, string> = {
 interface SupportFormProps {
     /** Show a fake attachment representing PostHog AI conversation history */
     attachPostHogAIConversation?: boolean
+    /** Show a fake attachment representing a screen recording */
+    attachScreenRecording?: boolean
 }
 
-export function SupportForm({ attachPostHogAIConversation = false }: SupportFormProps = {}): JSX.Element | null {
+export function SupportForm({
+    attachPostHogAIConversation = false,
+    attachScreenRecording = false,
+}: SupportFormProps = {}): JSX.Element | null {
     const { sendSupportRequest } = useValues(supportLogic)
     const { setSendSupportRequestValue } = useActions(supportLogic)
     const { objectStorageAvailable } = useValues(preflightLogic)
@@ -171,6 +176,15 @@ export function SupportForm({ attachPostHogAIConversation = false }: SupportForm
                                 <Tooltip title="Our support team will have access to the full conversation history to help understand your issue.">
                                     <LemonTag icon={<IconDocument />} type="success" size="medium">
                                         posthog_ai_conversation_history.txt
+                                    </LemonTag>
+                                </Tooltip>
+                            </div>
+                        )}
+                        {attachScreenRecording && (
+                            <div className="flex flex-row gap-2">
+                                <Tooltip title="Screen recording has been attached to help our support team understand your issue.">
+                                    <LemonTag icon={<IconRecord />} type="success" size="medium">
+                                        screen_recording.mp4
                                     </LemonTag>
                                 </Tooltip>
                             </div>
