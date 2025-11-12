@@ -75,7 +75,7 @@ function AppScene(): JSX.Element | null {
     if (featureFlags[FEATURE_FLAGS.AI_ONLY_MODE] && !hasExitedAIOnlyMode) {
         return (
             <>
-                <div className="fixed inset-0 bg-surface-secondary flex flex-col">
+                <div className="fixed inset-0 bg-surface-secondary flex flex-col overflow-auto">
                     <MaxInstance tabId="ai-only-mode" sidePanel isAIOnlyMode />
                 </div>
                 {toastContainer}
