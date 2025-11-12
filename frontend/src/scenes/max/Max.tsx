@@ -74,13 +74,13 @@ export function Max({ tabId }: { tabId?: string }): JSX.Element {
 export interface MaxInstanceProps {
     sidePanel?: boolean
     tabId: string
-    AIOnlyMode?: boolean
+    isAIOnlyMode?: boolean
 }
 
 export const MaxInstance = React.memo(function MaxInstance({
     sidePanel,
     tabId,
-    AIOnlyMode,
+    isAIOnlyMode,
 }: MaxInstanceProps): JSX.Element {
     const {
         threadVisible,
@@ -187,7 +187,7 @@ export const MaxInstance = React.memo(function MaxInstance({
                             )}
                         </h3>
                     </div>
-                    {!conversationHistoryVisible && !threadVisible && !AIOnlyMode && (
+                    {!conversationHistoryVisible && !threadVisible && !isAIOnlyMode && (
                         <LemonButton
                             size="small"
                             icon={<IconPlus />}
@@ -196,7 +196,7 @@ export const MaxInstance = React.memo(function MaxInstance({
                             tooltipPlacement="bottom"
                         />
                     )}
-                    {AIOnlyMode ? undefined : (
+                    {!isAIOnlyMode && (
                         <LemonButton
                             size="small"
                             sideIcon={<IconExternal />}

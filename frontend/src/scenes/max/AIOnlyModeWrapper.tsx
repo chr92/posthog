@@ -11,17 +11,16 @@ import { MaxInstance } from './Max'
 
 export function AIOnlyModeWrapper({ children }: { children: React.ReactNode }): JSX.Element {
     const { featureFlags } = useValues(featureFlagLogic)
-    const isAIOnlyModeEnabled = featureFlags[FEATURE_FLAGS.AI_ONLY_MODE]
-    const [isAIOnlyModeActive, setIsAIOnlyModeActive] = useState(true)
+    const [isAIOnlyModeActive, setIsAIOnlyModeActive] = useState(!!featureFlags[FEATURE_FLAGS.AI_ONLY_MODE])
 
     const exitAIOnlyMode = (): void => {
         setIsAIOnlyModeActive(false)
     }
 
-    if (isAIOnlyModeEnabled && isAIOnlyModeActive) {
+    if (isAIOnlyModeActive) {
         return (
             <div className="fixed inset-0 bg-bg-light dark:bg-bg-dark flex flex-col">
-                <MaxInstance tabId="ai-only-mode" sidePanel AIOnlyMode={true} />
+                <MaxInstance tabId="ai-only-mode" sidePanel isAIOnlyMode />
                 <LemonButton
                     type="secondary"
                     size="small"
