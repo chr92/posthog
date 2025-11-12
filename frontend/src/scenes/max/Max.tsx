@@ -8,6 +8,7 @@ import { NotFound } from 'lib/components/NotFound'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
+import { appLogic } from 'scenes/appLogic'
 import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
 import { sceneLogic } from 'scenes/sceneLogic'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -94,6 +95,7 @@ export const MaxInstance = React.memo(function MaxInstance({
     const { startNewConversation, toggleConversationHistory, goBack } = useActions(maxLogic({ tabId }))
     const { openSidePanelMax } = useActions(maxGlobalLogic)
     const { closeTabId } = useActions(sceneLogic)
+    const { exitAIOnlyMode } = useActions(appLogic)
 
     const threadProps: MaxThreadLogicProps = {
         tabId,
@@ -159,7 +161,13 @@ export const MaxInstance = React.memo(function MaxInstance({
 
     return sidePanel ? (
         <>
-            <SidePanelPaneHeader className="transition-all duration-200" onClose={() => startNewConversation()}>
+            <SidePanelPaneHeader
+                className="transition-all duration-200"
+                onClose={() => {
+                    exitAIOnlyMode()
+                    startNewConversation()
+                }}
+            >
                 <div className="flex flex-1">
                     <div className="flex items-center flex-1">
                         <AnimatedBackButton in={!backButtonDisabled}>
