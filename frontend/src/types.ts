@@ -3303,6 +3303,13 @@ export enum SurveyPosition {
     NextToTrigger = 'next_to_trigger',
 }
 
+export enum SurveyTabPosition {
+    Top = 'top',
+    Left = 'left',
+    Right = 'right',
+    Bottom = 'bottom',
+}
+
 export enum SurveyWidgetType {
     Button = 'button',
     Tab = 'tab',
@@ -3329,6 +3336,7 @@ export interface SurveyAppearance {
     thankYouMessageCloseButtonText?: string
     autoDisappear?: boolean
     position?: SurveyPosition
+    tabPosition?: SurveyTabPosition
     zIndex?: string
     shuffleQuestions?: boolean
     surveyPopupDelaySeconds?: number
