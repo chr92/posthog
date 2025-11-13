@@ -2922,6 +2922,13 @@ class SurveyQuestionType(StrEnum):
     LINK = "link"
 
 
+class SurveyTabPosition(StrEnum):
+    TOP = "top"
+    LEFT = "left"
+    RIGHT = "right"
+    BOTTOM = "bottom"
+
+
 class SurveyType(StrEnum):
     POPOVER = "popover"
     WIDGET = "widget"
@@ -5263,6 +5270,7 @@ class SurveyAppearanceSchema(BaseModel):
     ratingButtonColor: Optional[str] = None
     shuffleQuestions: Optional[bool] = None
     surveyPopupDelaySeconds: Optional[float] = None
+    tabPosition: Optional[SurveyTabPosition] = None
     textColor: Optional[str] = None
     textSubtleColor: Optional[str] = None
     thankYouMessageCloseButtonText: Optional[str] = None
